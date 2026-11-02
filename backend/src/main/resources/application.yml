@@ -1,0 +1,43 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: ai-math-teacher
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/aimath}
+    username: ${SPRING_DATASOURCE_USERNAME:aimath}
+    password: ${SPRING_DATASOURCE_PASSWORD:aimath}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    validate-on-migrate: true
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+app:
+  ai:
+    provider: ${APP_AI_PROVIDER:demo}
+    api-key: ${APP_AI_API_KEY:}
+    base-url: ${APP_AI_BASE_URL:}
+    model: ${APP_AI_MODEL:gpt-4o-mini}
+  storage:
+    endpoint: ${APP_STORAGE_ENDPOINT:http://localhost:9000}
+    access-key: ${APP_STORAGE_ACCESS_KEY:aimath}
+    secret-key: ${APP_STORAGE_SECRET_KEY:aimath-secret}
+    bucket: ${APP_STORAGE_BUCKET:math-lessons}
