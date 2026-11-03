@@ -7,6 +7,7 @@ import java.util.List;
 public class DemoAiLessonProvider implements AiLessonProvider {
  public LessonResponse createLesson(String level,int grade,String problem,boolean useOnlineAi,byte[] imageBytes,String imageContentType,String lessonLanguage) {
   if(useOnlineAi||imageBytes!=null)throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,"en".equals(lessonLanguage)?"Online AI is not configured. Set AI_PROVIDER=openai and add an API key in .env.":"Để AI đọc ảnh và giải bài, hãy cấu hình AI_PROVIDER=openai cùng API key có hỗ trợ đọc ảnh trong file .env.");
+  if(problem!=null&&!problem.isBlank())return guidedProblem(problem,grade,"en".equals(lessonLanguage));
   if("en".equals(lessonLanguage))return englishLesson(level);
   if("middle".equals(level))return new LessonResponse("Giải phương trình bậc nhất","Đại số · Phương trình một ẩn",List.of(
    new Step("Đọc phương trình","Mình cần tìm giá trị của x để hai vế bằng nhau. Hãy giải phương trình hai x cộng năm bằng mười bảy nhé.","2x + 5 = 17"),
@@ -23,6 +24,19 @@ public class DemoAiLessonProvider implements AiLessonProvider {
    new Step("Mình chọn phép tính","Mai có ít hơn Lan nên mình lấy số táo của Lan trừ đi phần ít hơn nhé.","Ít hơn → phép trừ\n25 − 8 = ?"),
    new Step("Tính thật cẩn thận","Hai mươi lăm trừ tám bằng mười bảy. Mình tách tám thành năm và ba nhé.","25 − 8\n= 25 − 5 − 3\n= 20 − 3\n= 17"),
    new Step("Trình bày bài giải","Vậy Mai có 17 quả táo. Nhớ ghi đơn vị và đáp số ở cuối nhé!","Bài giải\nSố quả táo của Mai là:\n25 − 8 = 17 (quả)\nĐáp số: 17 quả táo")),"17 quả táo","Nếu Mai có nhiều hơn Lan 8 quả táo, em sẽ làm phép tính nào?");
+ }
+ private LessonResponse guidedProblem(String problem,int grade,boolean english){
+  String shown=problem.length()>1200?problem.substring(0,1200)+"…":problem;
+  if(english)return new LessonResponse("Let’s work through your problem","Grade "+grade+" · Guided lesson",List.of(
+   new Step("Read your problem","Here is the problem you entered. Read it carefully and identify what it asks us to find.","Your problem:\n"+shown),
+   new Step("Identify the information","Underline the numbers, quantities, units, and conditions. Decide which math idea or operation connects them.","Given information → ?\nWhat are we finding?"),
+   new Step("Plan the solution","Write an equation or a short sequence of steps, then check that each step follows from the problem.","Plan → calculate → check"),
+   new Step("Get a tailored solution","This sample mode does not calculate a solution for custom problems. Turn on Online AI to generate and explain the answer to this exact problem.","Online AI → tailored solution")),"A tailored answer is not available in sample mode.","Turn on Online AI to solve this problem, or try writing the first equation yourself.");
+  return new LessonResponse("Cùng giải bài toán của em","Lớp "+grade+" · Hướng dẫn học tập",List.of(
+   new Step("Đọc đề bài","Đây là nội dung em vừa nhập. Mình cùng đọc kỹ và xác định đề bài yêu cầu tìm điều gì nhé.","Đề bài của em:\n"+shown),
+   new Step("Tìm dữ kiện","Gạch chân các số liệu, đơn vị và điều kiện. Xác định kiến thức hoặc phép tính liên hệ các dữ kiện đó.","Dữ kiện đã cho → ?\nCần tìm điều gì?"),
+   new Step("Lập kế hoạch giải","Viết phép tính hoặc các bước giải dự kiến, rồi kiểm tra từng bước có phù hợp với đề bài không.","Lập kế hoạch → tính → kiểm tra"),
+   new Step("Tạo lời giải cụ thể","Chế độ bài mẫu chưa tự tính được đề riêng. Bật AI online để tạo lời giải và thuyết minh cho đúng nội dung bài này nhé.","AI online → lời giải theo đề của em")),"Chế độ bài mẫu chưa tạo đáp số cho đề riêng.","Em thử viết phép tính đầu tiên nhé, hoặc bật AI online để Nobita hướng dẫn lời giải cụ thể.");
  }
  private LessonResponse englishLesson(String level){
   if("middle".equals(level))return new LessonResponse("Solve a linear equation","Algebra · One-variable equations",List.of(
